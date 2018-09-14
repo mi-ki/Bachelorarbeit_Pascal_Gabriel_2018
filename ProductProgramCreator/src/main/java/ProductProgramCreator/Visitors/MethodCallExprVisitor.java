@@ -10,16 +10,16 @@ import java.util.LinkedList;
  * Is used to find out if there is at least one method call of a method
  * that was defined inside this compilation Unit.
  */
-public class MethodCallExprVisitor extends VoidVisitorAdapter {
-    private MainWeaver weaver;
+public class MethodCallExprVisitor extends VoidVisitorAdapter<Object> {
+    // private MainWeaver weaver;
     private boolean thereIsAMethodCall;
     private String nameOfTheFirstMethodCalled;
     private LinkedList<String> allMethods;
     private LinkedList<String> allMethodCalls;
     @Override
     public void visit(MethodCallExpr n, Object arg) {
-        //Checks for the first occurrence of a call of a method that got declared
-        //in this unit and collect all called method names
+        //Checks for the first occurrence of a call of a method that got
+        // declared in this unit and collect all called method names
         String name = n.getName().asString();
         if(allMethods.contains(name)) {
             thereIsAMethodCall = true;
@@ -42,8 +42,10 @@ public class MethodCallExprVisitor extends VoidVisitorAdapter {
     }
 
     /**
-     * Returns the name of the first called method(that is defined in this unit)
-     * @return the name if isThereAMethodCall() yields true, an empty string otherwise
+     * Returns the name of the first called method
+     * (that is defined in this unit)
+     * @return the name if isThereAMethodCall() yields true,
+     *         otherwise an empty string.
      */
     public String methodName() {
         return nameOfTheFirstMethodCalled;
@@ -57,10 +59,10 @@ public class MethodCallExprVisitor extends VoidVisitorAdapter {
      * @param mainW The active MainWeaver
      */
     public MethodCallExprVisitor (MainWeaver mainW) {
-        this.weaver = mainW;
+        // this.weaver = mainW;
         this.thereIsAMethodCall = false;
         this.nameOfTheFirstMethodCalled = "";
         this.allMethods = mainW.getAllDeclaredMethods();
-        this.allMethodCalls = new LinkedList();
+        this.allMethodCalls = new LinkedList<String>();
     }
 }

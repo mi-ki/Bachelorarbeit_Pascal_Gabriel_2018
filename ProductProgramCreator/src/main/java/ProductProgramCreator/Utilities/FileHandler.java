@@ -12,10 +12,12 @@ import com.github.javaparser.ast.body.TypeDeclaration;
 
 import java.io.*;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Paths;
+import java.security.CodeSource;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -28,7 +30,8 @@ public class FileHandler {
      * @throws FileNotFoundException if the file was not found
      * @throws ParseProblemException if the source code has parser errors
      */
-    public CompilationUnit readFile(String filepath) throws FileNotFoundException, ParseProblemException{
+    public CompilationUnit readFile(String filepath)
+            throws FileNotFoundException, ParseProblemException {
         FileInputStream in = new FileInputStream(filepath);
         CompilationUnit retCU = JavaParser.parse(in);
         return retCU;
@@ -40,35 +43,53 @@ public class FileHandler {
      * @return
      * @throws FileNotFoundException if the file could not be found
      */
-    public InputStream fileStream(String filepath) throws FileNotFoundException{
+    public InputStream fileStream(String filepath)
+            throws FileNotFoundException {
         InputStream in = new FileInputStream(filepath);
         return in;
     }
 
     /**
-     * Creates a file with the given name in the location given and writes java code to it.
+     * Creates a file with the given name in the location given
+     * and writes Java code to it.
      * @param code  The AST representing the java code
-     * @param fileName  The name of the file, without extension. Should match the class name.
-     * @param location  The path to the directory in which to store the output(No file separator at the end)
-     * @throws IOException  if an I/O Error occurs writing to or creating the file
+     * @param fileName  The name of the file, without extension.
+     *                  Should match the class name.
+     * @param location  The path to the directory in which to store the output
+     *                  (No file separator at the end)
+     * @throws IOException  if an I/O Error occurs writing to
+     *                      or creating the file
      */
-    public void writeFile(CompilationUnit code, String fileName, String location) throws IOException {
+    public void writeFile(CompilationUnit code, String fileName,
+                          String location) throws IOException {
         String property = location + File.separator + fileName + ".java";
-        Files.write(new File(property).toPath(), Collections.singleton(code.toString()), StandardCharsets.UTF_8);
+        Files.write(new File(property).toPath(),
+                    Collections.singleton(code.toString()),
+                    StandardCharsets.UTF_8);
     }
     /**
-     * Creates a file with the given name in the location of this class or the respective .jar and writes the java code to it.
-     * @param code  The AST representing the java code
-     * @param fileName  The name of the file, without extension. Should match the class name.
-     * @throws IOException  if an I/O Error occurs writing to or creating the file
+     * Creates a file with the given name in the location of this class
+     * or the respective .jar and writes the Java code to it.
+     * @param code  The AST representing the Java code
+     * @param fileName  The name of the file, without extension.
+     *                  Should match the class name.
+     * @throws IOException  if an I/O Error occurs writing to
+     *                      or creating the file
      */
-    public void writeFile(CompilationUnit code, String fileName) throws IOException {
+    public void writeFile(CompilationUnit code, String fileName)
+            throws IOException {
+        final CodeSource cs =
+                ParserMain.class.getProtectionDomain().getCodeSource();
+        final URL loc = cs.getLocation();
         try {
-            File directory = new File(ParserMain.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath()).getParentFile();
+            File directory = new File(loc.toURI().getPath()).getParentFile();
             String property = directory + File.separator + fileName + ".java";
-            Files.write(new File(property).toPath(), Collections.singleton(code.toString()), StandardCharsets.UTF_8);
-        } catch (URISyntaxException e){
-            //Do nothing as this exception will not happen since the return value of "getLocation()" matches the needed standard
+            Files.write(new File(property).toPath(),
+                        Collections.singleton(code.toString()),
+                        StandardCharsets.UTF_8);
+        } catch (URISyntaxException e) {
+            //Do nothing as this exception will not happen since
+            // the return value of "getLocation()" matches the needed standard.
         }
     }
 
@@ -78,7 +99,8 @@ public class FileHandler {
      * @param addition  the suffix to add to the names
      */
     public void renameAllInFile(CompilationUnit code, String addition) {
-        //only renames methodcalls of which an equally named method got defined in the Comp Unit(can lead to errors)
+        //only renames method calls of which an equally named method
+        // was defined in the Comp Unit (can lead to errors)
         MethodListVisitor mLister = new MethodListVisitor();
         ClassListVisitor cLister = new ClassListVisitor();
         VariableListVisitor vLister = new VariableListVisitor();
@@ -88,7 +110,9 @@ public class FileHandler {
         LinkedList<String> allMethods = mLister.getMethodList();
         LinkedList<String> allClasses = cLister.getClassList();
         LinkedList<String> allVariables = vLister.getVariablesList();
-        AddingToNameVisitor add = new AddingToNameVisitor(addition, allMethods, allClasses, allVariables);
+        AddingToNameVisitor add =
+                new AddingToNameVisitor(addition, allMethods,
+                                        allClasses, allVariables);
         code.accept(add,new Object());
     }
 
@@ -100,15 +124,16 @@ public class FileHandler {
      * @return A single unit combined of all input units
      */
     public CompilationUnit combineUnits (LinkedList<CompilationUnit> unitsIn) {
-        LinkedList<CompilationUnit> units = new LinkedList();
+        LinkedList<CompilationUnit> units = new LinkedList<CompilationUnit>();
         units.addAll(unitsIn);
         CompilationUnit retUnit = units.get(0).clone();
         units.removeFirst();
-        for(CompilationUnit current : units) {
+        for(CompilationUnit current: units) {
             //Add the imports
-            for(ImportDeclaration currentImport : current.getImports()) {
+            for(ImportDeclaration currentImport: current.getImports()) {
                 retUnit.addImport(currentImport.getNameAsString(),
-                          currentImport.isStatic(), currentImport.isAsterisk());
+                          currentImport.isStatic(),
+                          currentImport.isAsterisk());
             }
             //Add all classes
             for(TypeDeclaration<?> currentClass : current.getTypes()) {
@@ -124,26 +149,32 @@ public class FileHandler {
      * @return The files content as priorityList for weaving use
      * @throws FileNotFoundException if the file could not be found
      */
-    public WeavingPriorityList getPriorityList(String path) throws FileNotFoundException {
+    public WeavingPriorityList getPriorityList(String path)
+            throws FileNotFoundException {
         FileInputStream input = new FileInputStream(path);
         //TODO
+        try { input.close(); } catch (IOException e) {}
         return null;
     }
 
     /**
-     * Returns the priority list of the weaving rules defined in the provided .txt
+     * Returns the priority list of the weaving rules defined in
+     * the provided .txt file
      * @return The priorityList
      * @throws FileNotFoundException if the provided .txt could not be found
      */
-    public WeavingPriorityList getPriorityList() throws IOException{
-        ClassLoader classloader = Thread.currentThread().getContextClassLoader();
-        InputStream input = classloader.getResourceAsStream("PriorityList.txt");
+    public WeavingPriorityList getPriorityList() throws IOException {
+        ClassLoader classloader =
+                Thread.currentThread().getContextClassLoader();
+        InputStream input =
+                classloader.getResourceAsStream("PriorityList.txt");
         if (input == null) {
             throw new FileNotFoundException();
         }
-        LinkedList<String> retList = new LinkedList();
+        LinkedList<String> retList = new LinkedList<String>();
         try {
-            BufferedReader br = new BufferedReader(new InputStreamReader(input, "UTF-8"));
+            BufferedReader br =
+                    new BufferedReader(new InputStreamReader(input, "UTF-8"));
             //Read all lines in
             while(br.ready()) {
                 retList.add(br.readLine());
@@ -167,7 +198,8 @@ public class FileHandler {
      * @param path The path to the file as String
      * @throws FileNotFoundException if the path was not correct
      */
-    public void printStringToFile(LinkedList<String> input, String path) throws FileNotFoundException {
+    public void printStringToFile(LinkedList<String> input,
+                                  String path) throws FileNotFoundException {
         PrintWriter printOut = new PrintWriter(new FileOutputStream(path));
         for(String current:input) {
             printOut.println(current);
@@ -176,7 +208,7 @@ public class FileHandler {
     }
 
     /**
-     * Checks wether a given path is correct.
+     * Checks whether a given path is correct.
      * @param path The path as String
      * @return true if it is correct, false otherwise
      */

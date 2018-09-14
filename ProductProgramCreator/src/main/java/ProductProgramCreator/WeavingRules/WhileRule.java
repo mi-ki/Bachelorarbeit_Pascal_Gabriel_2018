@@ -16,8 +16,9 @@ public class WhileRule extends WeavingRule {
     private MainWeaver weaver;
     private int counter = 0;
     @Override
-    public LinkedList<Statement> weave(Statement left, Statement right) throws WeaveException {
-        LinkedList<Statement> retList = new LinkedList();
+    public LinkedList<Statement> weave(Statement left, Statement right)
+            throws WeaveException {
+        LinkedList<Statement> retList = new LinkedList<Statement>();
 
         WhileStmt leftWhile = left.asWhileStmt().clone();
         WhileStmt rightWhile = right.asWhileStmt().clone();
@@ -26,20 +27,26 @@ public class WhileRule extends WeavingRule {
         leftBool.setName("lWhileB_" + counter);
         leftBool.setType(PrimitiveType.booleanType());
         leftBool.setInitializer(leftWhile.getCondition());
-        retList.add(new ExpressionStmt(new VariableDeclarationExpr(leftBool)));
+        final VariableDeclarationExpr vdeLeft =
+                new VariableDeclarationExpr(leftBool);
+        retList.add(new ExpressionStmt(vdeLeft));
         NameExpr leftBoolName = new NameExpr("lWhileB_" + counter);
 
         VariableDeclarator rightBool = new VariableDeclarator();
         rightBool.setName("rWhileB_" + counter);
         rightBool.setType(PrimitiveType.booleanType());
         rightBool.setInitializer(rightWhile.getCondition());
-        retList.add(new ExpressionStmt(new VariableDeclarationExpr(rightBool)));
+        final VariableDeclarationExpr vdeRight =
+                new VariableDeclarationExpr(rightBool);
+        retList.add(new ExpressionStmt(vdeRight));
         NameExpr rightBoolName = new NameExpr("rWhileB_" + counter);
         counter++;
         //initialize the return while stmt
         WhileStmt retWhile = new WhileStmt();
         //set condition
-        BinaryExpr cond = new BinaryExpr(leftBoolName, rightBoolName, BinaryExpr.Operator.OR);
+        BinaryExpr cond =
+                new BinaryExpr(leftBoolName, rightBoolName,
+                               BinaryExpr.Operator.OR);
         retWhile.setCondition(cond);
         //set body
         BlockStmt leftBlock = new BlockStmt();

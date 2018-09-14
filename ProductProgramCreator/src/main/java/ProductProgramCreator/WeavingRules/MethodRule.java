@@ -9,7 +9,6 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
-import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.Statement;
@@ -22,9 +21,10 @@ import static java.util.EnumSet.copyOf;
 
 public class MethodRule extends WeavingRule {
     private MainWeaver weaver;
-    private boolean weaveAutomatically;
+    // private boolean weaveAutomatically;
     @Override
-    public LinkedList<Statement> weave(Statement left, Statement right) throws WeaveException {
+    public LinkedList<Statement> weave(Statement left, Statement right)
+            throws WeaveException {
         /*
          * This method will only be called if two stmts with method calls
          * have to be weaved. That is because in the case of only annotated
@@ -34,14 +34,17 @@ public class MethodRule extends WeavingRule {
          */
         /*
          * Recursive methods that are called to be weaved will only be weaved
-         * if their declaration is part of the main class. Else nothing will happen.
+         * if their declaration is part of the main class.
+         * Otherwise, nothing will happen.
          */
-        Expression leftEx = left.toExpressionStmt().get().getExpression().clone();
-        Expression rightEx = right.toExpressionStmt().get().getExpression().clone();
+        final Expression leftEx =
+                left.toExpressionStmt().get().getExpression().clone();
+        final Expression rightEx =
+                right.toExpressionStmt().get().getExpression().clone();
         boolean leftIsCall = leftEx.isMethodCallExpr();
         boolean rightIsCall = rightEx.isMethodCallExpr();
         String leftMethodName;
-        //is either methodcall or assign expression
+        //is either method call or assign expression
         if(leftIsCall) {
             leftMethodName = leftEx.asMethodCallExpr().getName().asString();
         } else {
@@ -60,7 +63,8 @@ public class MethodRule extends WeavingRule {
         }
 
         //Get the method declarations
-        HashMap<String, MethodDeclaration> methods = new HashMap();
+        HashMap<String, MethodDeclaration> methods =
+                new HashMap<String, MethodDeclaration>();
         methods.putAll(weaver.getMethodAndClass(leftMethodName));
         methods.putAll(weaver.getMethodAndClass(rightMethodName));
         Iterator<MethodDeclaration> iterator = methods.values().iterator();
@@ -74,23 +78,25 @@ public class MethodRule extends WeavingRule {
             weaver.addDeclarationToMainClass(removeReturn(rightMethod));
         }
         //Change the method call on an AssignExpr and collect the arguments
-        NodeList<Expression> leftArgs = new NodeList();
-        NodeList<Expression> rightArgs = new NodeList();
+        NodeList<Expression> leftArgs = new NodeList<Expression>();
+        NodeList<Expression> rightArgs = new NodeList<Expression>();
         if(!leftIsCall) {
-            ChangeMethodCallVisitor vis = new ChangeMethodCallVisitor(leftMethodName);
+            ChangeMethodCallVisitor vis =
+                    new ChangeMethodCallVisitor(leftMethodName);
             leftEx.accept(vis, new Object());
             leftArgs = vis.getArguments();
         } else {
             leftArgs = leftEx.asMethodCallExpr().getArguments();
         }
         if(!rightIsCall) {
-            ChangeMethodCallVisitor vis = new ChangeMethodCallVisitor(rightMethodName);
+            ChangeMethodCallVisitor vis =
+                    new ChangeMethodCallVisitor(rightMethodName);
             rightEx.accept(vis, new Object());
             rightArgs = vis.getArguments();
         } else {
             rightArgs = rightEx.asMethodCallExpr().getArguments();
         }
-        NodeList<Expression> collectiveArgs = new NodeList();
+        NodeList<Expression> collectiveArgs = new NodeList<Expression>();
         collectiveArgs.addAll(leftArgs);
         collectiveArgs.addAll(rightArgs);
         //create the call of the new product method
@@ -102,11 +108,12 @@ public class MethodRule extends WeavingRule {
         //Create product method
         boolean isAlreadyDefined = weaver.methodIsDefined(productName);
         if(!isAlreadyDefined) {
-            //make sure a recursive call knows this method is already in progress
+            //make sure a recursive call knows this method
+            // is already in progress
             weaver.addNameToMethodList(productName);
             MethodDeclaration retDecl = new MethodDeclaration();
             //add modifiers
-            LinkedList<Modifier> declMods = new LinkedList();
+            LinkedList<Modifier> declMods = new LinkedList<Modifier>();
             declMods.add(Modifier.PUBLIC);
             EnumSet<Modifier> declModsSet = copyOf(declMods);
             retDecl.setModifiers(declModsSet);
@@ -119,17 +126,18 @@ public class MethodRule extends WeavingRule {
             declPar.addAll(rightMethod.getParameters());
             retDecl.setParameters(declPar);
             //set Body, initiate weave
-            //set method weaving to true, so that a recursive method will be correctly
-            //weaved without needing to add annotations to it
+            //set method weaving to true, so that a recursive method
+            //will be correctly weaved without needing to add annotations to it
             boolean backup = weaver.getMethodWeaving();
             weaver.setMethodWeaving(true);
-            retDecl.setBody(weaver.weave(leftMethod.getBody().get(), rightMethod.getBody().get()));
+            retDecl.setBody(weaver.weave(leftMethod.getBody().get(),
+                                         rightMethod.getBody().get()));
             weaver.setMethodWeaving(backup);
             weaver.addMethodToMainClass(retDecl);
         }
 
         //The list of statement to be added to the surrounding body
-        LinkedList<Statement> retList = new LinkedList();
+        LinkedList<Statement> retList = new LinkedList<Statement>();
         //Add all the statements
         retList.add(new ExpressionStmt(retCall));
         if(!leftIsCall) {
@@ -149,12 +157,12 @@ public class MethodRule extends WeavingRule {
     @Override
     public void addMainWeaver(MainWeaver mainW) {
         this.weaver = mainW;
-        this.weaveAutomatically = weaver.weaveMethodsAutomatically();
+        // this.weaveAutomatically = weaver.weaveMethodsAutomatically();
     }
 
     /**
-     * Checks wether the given expression has a method call of a method that is
-     * part of this compilation unit.
+     * Checks whether the given expression has a method call of a method
+     * that is part of this compilation unit.
      * Intended for use to precheck for method weaving.
      * It is advised to save the return value and reuse it, as the method may
      * get very expensive depending on the size of the AssignExpr.
@@ -173,18 +181,20 @@ public class MethodRule extends WeavingRule {
     }
 
     /**
-     * Checks wether the associated method is a recursive method.
-     * REMEMBER: methodnames in the whole input programs are demanded to
+     * Checks whether the associated method is a recursive method.
+     * REMEMBER: method names in the whole input programs are demanded to
      * be UNIQUE, else this will not work.
      * @param expr  The method call
      * @return true, if the method is recursive, false otherwise
      * @throws WeaveException if the method declaration could not be found
      */
-    private boolean isRecursiveMethod(MethodCallExpr expr) throws WeaveException{
+    private boolean isRecursiveMethod(MethodCallExpr expr)
+                throws WeaveException {
         //Get the method declaration to check for recursion in it
         String name = expr.getName().asString();
-        HashMap<String, MethodDeclaration> method = weaver.getMethodAndClass(name);
-        if(!(method == null)) {
+        HashMap<String, MethodDeclaration> method =
+                weaver.getMethodAndClass(name);
+        if (!(method == null)) {
             MethodCallExprVisitor visitor = new MethodCallExprVisitor(weaver);
             MethodDeclaration m = method.values().iterator().next();
             m.accept(visitor, new Object());
@@ -197,27 +207,30 @@ public class MethodRule extends WeavingRule {
     }
 
     /**
-     * Changes all return statements in a method to assign to 'retValueOf' + MethodName.
+     * Changes all return statements in a method to assign to
+     * 'retValueOf' + MethodName.
      * Only call this method if it is sure to have a return type.
-     * @param in    The methoddeclaration to change
+     * @param in    The method declaration to change
      * @return  The FieldDeclaration that needs to be added to the classes body
-     *          null if it had no return stmts
+     *          null if it had no return statements.
      */
     public FieldDeclaration removeReturn(MethodDeclaration in) {
         boolean didSomething = false;
         NameExpr name = new NameExpr("retValueOf" + in.getName().asString());
-        for(Statement current : in.getBody().get().getStatements()) {
-            if(current.isReturnStmt()) {
-                Expression rightSide = current.asReturnStmt().getExpression().get();
-                AssignExpr ret = new AssignExpr(name, rightSide, AssignExpr.Operator.ASSIGN );
+        for (Statement current : in.getBody().get().getStatements()) {
+            if (current.isReturnStmt()) {
+                final Expression rightSide =
+                        current.asReturnStmt().getExpression().get();
+                AssignExpr ret = new AssignExpr(name, rightSide,
+                                                AssignExpr.Operator.ASSIGN);
                 current.replace(new ExpressionStmt(ret));
                 didSomething = true;
             }
         }
-        if(didSomething) {
+        if (didSomething) {
             Type type = in.getType();
             in.setType(new VoidType());
-            LinkedList<Modifier> list = new LinkedList();
+            LinkedList<Modifier> list = new LinkedList<Modifier>();
             list.add(Modifier.PUBLIC);
             EnumSet<Modifier> set = EnumSet.copyOf(list);
             return new FieldDeclaration(set, type, name.getNameAsString());
@@ -225,7 +238,4 @@ public class MethodRule extends WeavingRule {
             return null;
         }
     }
-
-
-
 }

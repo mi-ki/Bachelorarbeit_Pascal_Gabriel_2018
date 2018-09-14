@@ -5,7 +5,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.InputStream;
 
-public class TextFieldInputStream extends InputStream implements ActionListener {
+public class TextFieldInputStream extends InputStream
+                implements ActionListener {
 
     private JTextField tf;
     private String str = null;
@@ -15,7 +16,7 @@ public class TextFieldInputStream extends InputStream implements ActionListener 
         tf = jtf;
     }
 
-    //gets triggered everytime that "Enter" is pressed on the textfield
+    //gets triggered every time that "Enter" is pressed on the text field
     @Override
     public void actionPerformed(ActionEvent e) {
         str = tf.getText() + "\n";
@@ -39,11 +40,12 @@ public class TextFieldInputStream extends InputStream implements ActionListener 
             //but I'm having a hard time locating the constant
             return java.io.StreamTokenizer.TT_EOF;
         }
-        //no input available, block until more is available because that's
+        //no input available, block until more is available because that is
         //the behavior specified in the Javadocs
         while (str == null || pos >= str.length()) {
             try {
-                //according to the docs read() should block until new input is available
+                //according to the docs, read() should block until
+                // new input is available
                 synchronized (this) {
                     this.wait();
                 }

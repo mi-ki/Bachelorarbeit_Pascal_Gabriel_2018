@@ -11,7 +11,7 @@ import java.util.Optional;
 /**
  * Is used to find a certain method.
  */
-public class FindMethodVisitor extends VoidVisitorAdapter {
+public class FindMethodVisitor extends VoidVisitorAdapter<Object> {
     private String methodName;
     private MethodDeclaration retMethod;
     private String className;
@@ -27,7 +27,8 @@ public class FindMethodVisitor extends VoidVisitorAdapter {
             while (optParent.isPresent() && !stop) {
                 String type = optParent.get().getMetaModel().toString();
                 if (type.equals("ClassOrInterfaceDeclaration")) {
-                    ClassOrInterfaceDeclaration decl = (ClassOrInterfaceDeclaration) optParent.get();
+                    ClassOrInterfaceDeclaration decl =
+                            (ClassOrInterfaceDeclaration) optParent.get();
                     className = decl.getNameAsString();
                     stop = true;
                 } else {
@@ -41,17 +42,18 @@ public class FindMethodVisitor extends VoidVisitorAdapter {
 
     /**
      * Returns the result of the search.
-     * @return A one element HashMap with the name of the surrounding class as key
-     *         and the MethodDeclaration as value
+     * @return A one element HashMap with the name of the surrounding class
+     *         as key and the MethodDeclaration as value
      */
     public HashMap<String, MethodDeclaration> getResults() {
-        HashMap<String, MethodDeclaration> retMap = new HashMap();
+        HashMap<String, MethodDeclaration> retMap =
+                new HashMap<String, MethodDeclaration>();
         retMap.put(className, retMethod);
         return retMap;
     }
 
     /**
-     * Wether or not the method has been found.
+     * Whether or not the method has been found.
      * @return true if it has been found, false otherwise
      */
     public boolean methodFound() {

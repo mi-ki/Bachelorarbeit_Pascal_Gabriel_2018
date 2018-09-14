@@ -1,15 +1,15 @@
 package ProductProgramCreator.Visitors;
 
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
 import java.util.LinkedList;
 
 /**
- * A visitor to accumulate all names of the classes in a given Compilation Unit.
+ * A visitor to accumulate all names of the classes
+ * in a given Compilation Unit.
  */
-public class ClassListVisitor extends VoidVisitorAdapter {
+public class ClassListVisitor extends VoidVisitorAdapter<Object> {
     private LinkedList<String> allClasses = new LinkedList<String>();
 
     /**

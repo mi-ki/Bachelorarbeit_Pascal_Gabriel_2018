@@ -18,7 +18,7 @@ public class DefaultAnnotationRule extends AnnotationRule {
 
     @Override
     public LinkedList<Statement> weave(BlockStmt left, BlockStmt right)
-                                                            throws WeaveException {
+                throws WeaveException {
         BlockStmt retBlock = weaver.weave(left, right);
         return weaver.blockToList(retBlock);
     }

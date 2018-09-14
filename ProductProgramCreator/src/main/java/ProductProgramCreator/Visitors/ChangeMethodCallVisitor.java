@@ -8,9 +8,9 @@ import com.github.javaparser.ast.visitor.ModifierVisitor;
 import com.github.javaparser.ast.visitor.Visitable;
 
 /**
- * Its purpose is to be called on an assignexpr to change its first methodcall
+ * Its purpose is to be called on an assignexpr to change its first method call
  */
-public class ChangeMethodCallVisitor extends ModifierVisitor {
+public class ChangeMethodCallVisitor extends ModifierVisitor<Object> {
     private boolean hasChanged;
     private String methodToChange;
     private NodeList<Expression> arguments;
@@ -34,6 +34,6 @@ public class ChangeMethodCallVisitor extends ModifierVisitor {
     public ChangeMethodCallVisitor(String name) {
         this.hasChanged = false;
         this.methodToChange = name;
-        this.arguments = new NodeList();
+        this.arguments = new NodeList<Expression>();
     }
 }

@@ -6,14 +6,14 @@ import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
 import com.github.javaparser.ast.visitor.Visitable;
-import sun.awt.image.ImageWatched;
 
 import java.util.LinkedList;
 
 /**
- * A visitor used for adding a certain String to all names in a compilation unit.
+ * A visitor used for adding a certain String to all names
+ * in a compilation unit.
  */
-public class AddingToNameVisitor extends ModifierVisitor {
+public class AddingToNameVisitor extends ModifierVisitor<Object> {
     private String addition;
     private LinkedList<String> allMethods;
     private LinkedList<String> allClasses;
@@ -24,9 +24,12 @@ public class AddingToNameVisitor extends ModifierVisitor {
      * @param addition The String to be added to a visited name.
      * @param methodsToInclude  a List of methods to include in the renaming
      * @param classesToInclude  a list of classes to include in the renaming
-     * @param varsToInclude     a list of variables to include int the renaming
+     * @param varsToInclude     a list of variables to include in the renaming
      */
-    public AddingToNameVisitor(String addition,LinkedList<String> methodsToInclude, LinkedList<String> classesToInclude, LinkedList<String> varsToInclude) {
+    public AddingToNameVisitor(String addition,
+                               LinkedList<String> methodsToInclude,
+                               LinkedList<String> classesToInclude,
+                               LinkedList<String> varsToInclude) {
         super();
         setAddition(addition);
         this.allMethods = methodsToInclude;

@@ -8,14 +8,16 @@ import com.github.javaparser.ast.stmt.Statement;
 import java.util.LinkedList;
 
 public abstract class AnnotationRule {
-    private MainWeaver weaver;
+    // private MainWeaver weaver;
 
-    public abstract LinkedList<Statement> weave(BlockStmt left, BlockStmt right) throws WeaveException;
+    public abstract LinkedList<Statement> weave(BlockStmt left,
+                                                BlockStmt right)
+                throws WeaveException;
 
     public abstract String getName();
 
     public void addMainWeaver (MainWeaver mainW){
-        this.weaver = mainW;
+        // this.weaver = mainW;
     }
 
 }

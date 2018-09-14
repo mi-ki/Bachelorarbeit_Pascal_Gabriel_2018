@@ -4,9 +4,6 @@ import ProductProgramCreator.Utilities.*;
 import com.github.javaparser.*;
 import com.github.javaparser.ast.*;
 import com.github.javaparser.ast.body.*;
-import org.reflections.Reflections;
-import org.reflections.scanners.SubTypesScanner;
-import org.reflections.util.ClasspathHelper;
 
 import javax.swing.*;
 import java.awt.*;
@@ -17,9 +14,8 @@ import java.io.InputStreamReader;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
 import java.io.*;
-import java.util.List;
+import java.util.LinkedList;
 
 public class ParserMain {
     //Used to print all inputs to a file
@@ -42,7 +38,8 @@ public class ParserMain {
         JTextArea textArea = new JTextArea(20, 80);
         textArea.setEditable(false);
         JScrollPane scroll = new JScrollPane(textArea);
-        scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        scroll.setVerticalScrollBarPolicy(
+                ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
         JPanel panel = new JPanel(new BorderLayout());
         panel.add(scroll, BorderLayout.PAGE_START);
         panel.add(textField, BorderLayout.PAGE_END);
@@ -52,7 +49,8 @@ public class ParserMain {
         frame.setVisible(true);
 
         //Redirect the System.in and System.out
-        PrintStream printStream = new PrintStream(new TextAreaOutputStream(textArea));
+        PrintStream printStream =
+                new PrintStream(new TextAreaOutputStream(textArea));
         System.setOut(printStream);
         System.setErr(printStream);
         TextFieldInputStream readStream = new TextFieldInputStream(textField);
@@ -70,19 +68,21 @@ public class ParserMain {
     }
 
     /**
-     * Interacts with the user to get all the data needed for the weaving process.
-     * Starts the weaving.
+     * Interacts with the user to get all the data needed
+     * for the weaving process. Starts the weaving.
      * @param args
      */
-    public static void mainInteraction(String[] args){
+    public static void mainInteraction(String[] args) {
         try {
             //new reader for the console & new file handler
             FileHandler fh = new FileHandler();
-            BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+            BufferedReader br =
+                    new BufferedReader(new InputStreamReader(System.in));
             standardIn = new BufferedReader(new InputStreamReader(System.in));
             if(args.length == 0) {
                 //check if a configuration file should be printed
-                print("Do you want to save the following configuration in a file?(Y/N)");
+                print("Do you want to save the following configuration in" +
+                      " a file?(Y/N)");
                 boolean printOut = yesOrNoRead(br);
                 //Remove this, as it should not appear in the file
                 validInputs.removeLast();
@@ -95,7 +95,8 @@ public class ParserMain {
                         if(pathValid) {
                             configFileOutput = in;
                         } else {
-                            print("The File could not be found, please input again:");
+                            print("The file could not be found," +
+                                  " please input again:");
                             in = br.readLine();
                         }
                     }
@@ -105,11 +106,13 @@ public class ParserMain {
                     boolean fileInput = yesOrNoRead(br);
                     if(fileInput) {
                         print("Please input the path for the file.");
-                        br = new PrintingBufferedReader(new InputStreamReader(readFile(br)));
+                        br = new PrintingBufferedReader(
+                                new InputStreamReader(readFile(br)));
                     }
                 }
             } else {
-                br = new PrintingBufferedReader(new InputStreamReader(fh.fileStream(args[0])));
+                br = new PrintingBufferedReader(
+                        new InputStreamReader(fh.fileStream(args[0])));
             }
 
             //Get all of the left files
@@ -169,7 +172,8 @@ public class ParserMain {
                 print("Please input the path to the file:");
                 prioPath = isValidPath(br);
             }
-            print("Do you want to weave methods automatically(Y) or only if annotated(N)?");
+            print("Do you want to weave methods automatically(Y) or" +
+                  " only if annotated(N)?");
             boolean weaveMethodsAuto = yesOrNoRead(br);
             //combine the units into one compilation unit per side
             //set the storage component for later use
@@ -181,20 +185,23 @@ public class ParserMain {
             //rename the contents
             fh.renameAllInFile(left, leftSuffix);
             fh.renameAllInFile(right, rightSuffix);
-            //initiate the weaving process, check if custom priority list is given
+            //initiate the weaving process, check if
+            // custom priority list is given
             MainWeaver weaver;
             if(customPrio) {
-                weaver = new MainWeaver(leftSuffix, rightSuffix, leftMethodName,
-                        rightMethodName, prioPath, weaveMethodsAuto);
+                weaver = new MainWeaver(leftSuffix, rightSuffix,
+                                        leftMethodName, rightMethodName,
+                                        prioPath, weaveMethodsAuto);
             } else {
-                weaver = new MainWeaver(leftSuffix, rightSuffix, leftMethodName,
-                                                                rightMethodName);
+                weaver = new MainWeaver(leftSuffix, rightSuffix,
+                                        leftMethodName, rightMethodName);
             }
             weaver.setMethodWeaving(weaveMethodsAuto);
             CompilationUnit out = weaver.initiateWeave(left, right);
             String leftName = left.getStorage().get().getFileName().toString();
             leftName = leftName.substring(0, leftName.length() - 5);
-            String rightName = right.getStorage().get().getFileName().toString();
+            String rightName =
+                    right.getStorage().get().getFileName().toString();
             rightName = rightName.substring(0, rightName.length() - 5);
             String outputName = leftName + leftSuffix + "_x_" + rightName
                                                                 + rightSuffix;
@@ -238,8 +245,8 @@ public class ParserMain {
      * @return
      * @throws IOException
      */
-    private static int readInteger(BufferedReader br) throws IOException{
-        //Indicates if a reading process has been successfull
+    private static int readInteger(BufferedReader br) throws IOException {
+        //Indicates if a reading process has been successful
         BufferedReader b = br;
         boolean readComplete = false;
         int retNr = 0;
@@ -250,7 +257,7 @@ public class ParserMain {
                     readComplete = true;
                 } else {
                     print("Number has to be > 0! Input again:");
-                    //use standardinput for error handling
+                    //use standard input for error handling
                     b = standardIn;
                 }
             } catch (NumberFormatException e){
@@ -290,10 +297,12 @@ public class ParserMain {
      * @return  A list of the files as Compilation Units
      * @throws IOException
      */
-    private static LinkedList<CompilationUnit> readFiles
-            (BufferedReader br, int amount) throws IOException{
+    private static LinkedList<CompilationUnit>
+            readFiles(BufferedReader br, int amount)
+                    throws IOException {
         BufferedReader b = br;
-        LinkedList<CompilationUnit> retList = new LinkedList();
+        LinkedList<CompilationUnit> retList =
+                new LinkedList<CompilationUnit>();
         FileHandler fh = new FileHandler();
         String[] inputsToWrite = new String[amount];
         for (int i = 0; i < amount; i++) {
@@ -347,7 +356,7 @@ public class ParserMain {
      * @throws IOException
      */
     private static String readMethod (BufferedReader br, CompilationUnit main)
-                                                            throws IOException {
+                throws IOException {
         BufferedReader b = br;
         String ret = "";
         boolean readComplete = false;
@@ -357,13 +366,15 @@ public class ParserMain {
             //get the main class of the main file
             String className = main.getStorage().get().getFileName().toString();
             className = className.substring(0, className.length() - 5);
-            ClassOrInterfaceDeclaration c = main.getClassByName(className).get();
+            final ClassOrInterfaceDeclaration c =
+                    main.getClassByName(className).get();
 
             //Count the methods with the given name
             int amountMethods = 0;
-            for(BodyDeclaration<?> current : c.getMembers()) {
+            for(BodyDeclaration<?> current: c.getMembers()) {
                 if (current.isMethodDeclaration()) {
-                    String name = current.asMethodDeclaration().getName().toString();
+                    String name =
+                            current.asMethodDeclaration().getName().toString();
                     if (name.equals(ret)) {
                         amountMethods++;
                     }
@@ -377,8 +388,8 @@ public class ParserMain {
             } else if (amountMethods == 1) {
                 readComplete = true;
             } else {
-                print("Only one method with this name may exist in this class." +
-                        " Input again!");
+                print("Only one method with this name may exist in this class."
+                      + " Input again!");
                 b = standardIn;
             }
         }

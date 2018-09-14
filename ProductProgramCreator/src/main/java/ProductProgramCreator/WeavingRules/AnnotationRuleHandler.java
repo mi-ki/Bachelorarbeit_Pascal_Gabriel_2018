@@ -10,6 +10,7 @@ import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 import org.reflections.util.ClasspathHelper;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Set;
@@ -59,26 +60,38 @@ public class AnnotationRuleHandler extends WeavingRule {
         } catch (IllegalAccessException e) {
             System.out.println("An error has occurred during annotation instantiation." +
                     "Annotations may not work correctly.");
+        } catch (Exception e) {
+            System.out.println("An error has occurred during annotation instantiation." +
+                    "Annotations may not work correctly.");
         }
     }
 
     /**
      * Collects all annotation rules and instantiates them
-     * @return  A Hashmap containing the rules, where key is they name and value the rule itself
+     * @return  A HashMap containing the rules,
+     *          where key is they name and value the rule itself
      * @throws IllegalAccessException
      * @throws InstantiationException
+     * @throws SecurityException
+     * @throws NoSuchMethodException
+     * @throws InvocationTargetException
+     * @throws IllegalArgumentException
      */
     private HashMap<String, AnnotationRule> getRules ()
-            throws IllegalAccessException, InstantiationException {
-        HashMap<String, AnnotationRule> retMap = new HashMap();
+            throws IllegalAccessException, InstantiationException,
+                   IllegalArgumentException, InvocationTargetException,
+                   NoSuchMethodException, SecurityException {
+        HashMap<String, AnnotationRule> retMap =
+                new HashMap<String, AnnotationRule>();
         Reflections reflections = new Reflections(
                 ClasspathHelper.forPackage("ProductProgramCreator"),
-                new SubTypesScanner());
+                                           new SubTypesScanner());
         Set<Class<? extends AnnotationRule>> extendingClasses =
                 reflections.getSubTypesOf(AnnotationRule.class);
-        LinkedList<WeavingRule> rules = new LinkedList();
-        for(Class current : extendingClasses) {
-            AnnotationRule currentRule = (AnnotationRule)current.newInstance();
+        // LinkedList<WeavingRule> rules = new LinkedList<WeavingRule>();
+        for(Class<?> current : extendingClasses) {
+            AnnotationRule currentRule =
+                    (AnnotationRule)current.getConstructor().newInstance();
             currentRule.addMainWeaver(weaver);
             retMap.put(currentRule.getName(), currentRule);
         }

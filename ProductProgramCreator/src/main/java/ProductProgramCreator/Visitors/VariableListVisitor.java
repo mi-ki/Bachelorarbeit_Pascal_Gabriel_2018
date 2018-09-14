@@ -1,17 +1,15 @@
 package ProductProgramCreator.Visitors;
 
-import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
-import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
 import java.util.LinkedList;
 
-public class VariableListVisitor extends VoidVisitorAdapter {
+public class VariableListVisitor extends VoidVisitorAdapter<Object> {
     private LinkedList<String> allVariables = new LinkedList<String>();
 
     /**
-     * Return a list of all methods in the visited Compilaton Unit.
+     * Return a list of all methods in the visited Compilation Unit.
      * Only call this method after you have visited a Compilation Unit.
      * @return the names of all Methods in the visited Compilation Unit
      */
