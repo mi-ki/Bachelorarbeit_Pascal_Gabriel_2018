@@ -927,6 +927,7 @@ public class MainWeaver {
      * @return the declaration of the field that got added,
      *         null if method was already void
      */
+    @SuppressWarnings("unused")
     private FieldDeclaration
                 transformToVoid(ClassOrInterfaceDeclaration correspondingClass,
                                 MethodDeclaration inputMethod,
@@ -992,10 +993,10 @@ public class MainWeaver {
      * @throws IllegalAccessException   if a rule or its nullary constructor is
      *                                  not available
      * @throws InstantiationException   if instantiation failed for a rule
-     * @throws SecurityException 
-     * @throws NoSuchMethodException 
-     * @throws InvocationTargetException 
-     * @throws IllegalArgumentException 
+     * @throws SecurityException
+     * @throws NoSuchMethodException
+     * @throws InvocationTargetException
+     * @throws IllegalArgumentException
      */
     private HashMap<String, WeavingRule> getRules ()
             throws IllegalAccessException, InstantiationException,
@@ -1066,7 +1067,7 @@ public class MainWeaver {
         } else {
             return stmt.getMetaModel().toString();
         }
-    }    
+    }
 
     /**
      * Checks whether the comments of a given statement start with '@weave'
@@ -1101,10 +1102,11 @@ public class MainWeaver {
      * @param in    A statement with a '@weave<type>' annotation
      * @return 'type', null if no annotation was found
      */
+    @SuppressWarnings("unused")
     private String getAnnotationType(Statement in) {
         Optional<Comment> comment = in.getComment();
         if(comment.isPresent()) {
-            String comString = comment.get().getContent();    
+            String comString = comment.get().getContent();
             comString = comString.trim();
             comString = comString.substring(6, comString.indexOf(">"));
             return comString;
@@ -1258,7 +1260,7 @@ public class MainWeaver {
     /**
      * Gets the label of an annotation on the given statement.
      * Expects there to be an annotation. Will return an empty
-     * string otherwise.    
+     * string otherwise.
      * @param in the statement to check on
      * @return the label, an empty String if none could be found
      */

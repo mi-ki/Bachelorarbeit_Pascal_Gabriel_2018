@@ -188,6 +188,7 @@ public class MethodRule extends WeavingRule {
      * @return true, if the method is recursive, false otherwise
      * @throws WeaveException if the method declaration could not be found
      */
+    @SuppressWarnings("unused")
     private boolean isRecursiveMethod(MethodCallExpr expr)
                 throws WeaveException {
         //Get the method declaration to check for recursion in it
